@@ -6,6 +6,7 @@ import (
 	"go-crud2/internal/auth"
 	"go-crud2/internal/health"
 	"go-crud2/internal/middleware"
+	"go-crud2/internal/profiling"
 	"go-crud2/internal/user"
 	"log"
 	"net/http"
@@ -35,6 +36,10 @@ func main() {
 		repo user.Repository
 		db   *sql.DB
 	)
+
+	if os.Getenv("APP_ENV") != "prod" {
+		profiling.Start()
+	}
 
 	switch adapter {
 	case "inmemory":
