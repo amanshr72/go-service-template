@@ -37,7 +37,7 @@ func RegisterRoutes(mux *http.ServeMux, db *sql.DB) {
 // @Success 200 {object} response
 // @Router /health [get]
 func liveness() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, _ *http.Request) {
 		writeJSON(w, http.StatusOK, response{
 			Status:    "ok",
 			Timestamp: time.Now().UTC().Format(time.RFC3339),
@@ -54,7 +54,7 @@ func liveness() http.HandlerFunc {
 // @Failure 503 {object} map[string]string
 // @Router /health/ready [get]
 func readiness(db *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, _ *http.Request) {
 		if db != nil {
 			if err := db.Ping(); err != nil {
 				writeJSON(w, http.StatusServiceUnavailable, map[string]string{
@@ -76,7 +76,7 @@ func readiness(db *sql.DB) http.HandlerFunc {
 // @Success 200 {object} map[string]interface{}
 // @Router /metrics [get]
 func metrics() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, _ *http.Request) {
 		var mem runtime.MemStats
 		runtime.ReadMemStats(&mem)
 

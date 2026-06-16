@@ -3,6 +3,7 @@ package user
 import (
 	"database/sql"
 	"errors"
+	"log"
 	"time"
 )
 
@@ -43,7 +44,11 @@ func (r *postgresRepo) FindAll() ([]User, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("close rows: %v", err)
+		}
+	}()
 	var users []User
 	for rows.Next() {
 		var u User
@@ -72,7 +77,11 @@ func (r *postgresRepo) FindByActive(active bool) ([]User, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() {
+		if err := rows.Close(); err != nil {
+			log.Printf("close rows: %v", err)
+		}
+	}()
 	var users []User
 	for rows.Next() {
 		var u User

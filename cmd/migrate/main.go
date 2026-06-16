@@ -38,7 +38,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("db open: %v", err)
 	}
-	defer db.Close()
+	defer func() {
+		if err := db.Close(); err != nil {
+			log.Printf("close db: %v", err)
+		}
+	}()
 
 	if err := goose.SetDialect("postgres"); err != nil {
 		log.Fatal(err)

@@ -19,8 +19,8 @@ func NewMockRepository() *MockRepository {
 func (m *MockRepository) Create(u *User) error {
 	u.ID = m.nextID
 	m.nextID++
-	copy := *u
-	m.users[copy.ID] = &copy
+	userCopy := *u
+	m.users[userCopy.ID] = &userCopy
 	return nil
 }
 
@@ -58,8 +58,8 @@ func (m *MockRepository) Update(u *User) error {
 	if _, ok := m.users[u.ID]; !ok {
 		return errors.New("user not found")
 	}
-	copy := *u
-	m.users[u.ID] = &copy
+	userCopy := *u
+	m.users[u.ID] = &userCopy
 	return nil
 }
 

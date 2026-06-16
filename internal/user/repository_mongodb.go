@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -43,7 +44,11 @@ func (r *mongoRepo) FindAll() ([]User, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(context.Background())
+	defer func() {
+		if err := cursor.Close(context.Background()); err != nil {
+			log.Printf("close db: %v", err)
+		}
+	}()
 	var users []User
 	if err := cursor.All(context.Background(), &users); err != nil {
 		return nil, err
@@ -65,7 +70,11 @@ func (r *mongoRepo) FindByActive(active bool) ([]User, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer cursor.Close(context.Background())
+	defer func() {
+		if err := cursor.Close(context.Background()); err != nil {
+			log.Printf("close db: %v", err)
+		}
+	}()
 	var users []User
 	if err := cursor.All(context.Background(), &users); err != nil {
 		return nil, err

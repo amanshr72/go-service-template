@@ -23,8 +23,8 @@ func (r *InMemoryRepository) Create(u *User) error {
 	u.CreatedAt = time.Now()
 	u.UpdatedAt = time.Now()
 	r.nextID++
-	copy := *u
-	r.users[copy.ID] = &copy
+	userCopy := *u
+	r.users[userCopy.ID] = &userCopy
 	return nil
 }
 

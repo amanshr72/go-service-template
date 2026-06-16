@@ -11,7 +11,7 @@ import (
 // --- RequestID ---
 
 func TestRequestID_GeneratesID(t *testing.T) {
-	handler := RequestID(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := RequestID(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
 		id := GetRequestID(r)
 		assert.NotEmpty(t, id) // ID must be in context
 	}))
@@ -24,7 +24,7 @@ func TestRequestID_GeneratesID(t *testing.T) {
 }
 
 func TestRequestID_HonoursExisting(t *testing.T) {
-	handler := RequestID(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	handler := RequestID(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {}))
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.Header.Set("X-Request-ID", "my-trace-id")
@@ -37,7 +37,7 @@ func TestRequestID_HonoursExisting(t *testing.T) {
 // --- Recovery ---
 
 func TestRecovery_CatchesPanic(t *testing.T) {
-	handler := Recovery(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := Recovery(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
 		panic("something broke")
 	}))
 

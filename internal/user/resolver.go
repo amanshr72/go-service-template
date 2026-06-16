@@ -2,6 +2,7 @@ package user
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/graphql-go/graphql"
 )
@@ -26,7 +27,7 @@ func NewSchema(svc Service) (graphql.Schema, error) {
 
 			"users": &graphql.Field{
 				Type: graphql.NewList(UserType),
-				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				Resolve: func(_ graphql.ResolveParams) (interface{}, error) {
 					return svc.GetAll()
 				},
 			},
@@ -61,7 +62,7 @@ func NewSchema(svc Service) (graphql.Schema, error) {
 
 			"userCount": &graphql.Field{
 				Type: graphql.Int,
-				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+				Resolve: func(_ graphql.ResolveParams) (interface{}, error) {
 					return svc.GetCount()
 				},
 			},
@@ -80,10 +81,20 @@ func NewSchema(svc Service) (graphql.Schema, error) {
 					"email": &graphql.ArgumentConfig{Type: graphql.NewNonNull(graphql.String)},
 				},
 				Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+					name, ok := p.Args["name"].(string)
+					if !ok {
+						return nil, fmt.Errorf("invalid name")
+					}
+
+					email, ok := p.Args["email"].(string)
+					if !ok {
+						return nil, fmt.Errorf("invalid email")
+					}
 					return svc.Create(CreateUserInput{
-						Name:  p.Args["name"].(string),
-						Email: p.Args["email"].(string),
+						Name:  name,
+						Email: email,
 					})
+
 				},
 			},
 

@@ -1,7 +1,7 @@
+version: "2"
+
 run:
   timeout: 5m
-  exclude-dirs:
-    - docs
 
 linters:
   enable:
@@ -9,10 +9,18 @@ linters:
     - govet
     - staticcheck
     - unused
-    - gofmt
-    - goimports
     - revive
 
-linters-settings:
-  errcheck:
-    check-type-assertions: true
+  settings:
+    revive:
+      rules:
+        - name: package-comments
+          disabled: true
+
+        - name: exported
+          disabled: true
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
