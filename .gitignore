@@ -1,0 +1,28 @@
+# Env & secrets
+.env
+*.env.local
+
+# Binaries
+*.exe
+server
+go-crud2.exe
+
+# Build artifacts
+/tmp
+/bin
+coverage.out
+coverage.html
+
+# Swagger generated (regenerate via swag init)
+docs/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Go
+vendor/

@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  # postgres:
+  #   image: postgres:15-alpine
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres123
+  #     POSTGRES_DB: go_crud2
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    # depends_on:
+    #   - postgres
+    environment:
+      DATABASE_URL: host=host.docker.internal user=postgres password=postgres123 dbname=go_crud2 port=5432 sslmode=disable
+
+volumes:
+  pgdata:
