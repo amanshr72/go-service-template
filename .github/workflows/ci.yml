@@ -43,7 +43,7 @@ jobs:
       - name: Run lint
         uses: golangci/golangci-lint-action@v8
         with:
-          version: v1.64.8
+          version: latest
 
       - name: Run DDL migrations
         env:
