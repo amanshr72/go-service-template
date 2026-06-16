@@ -65,5 +65,8 @@ jobs:
       - name: Show coverage summary
         run: go tool cover -func=coverage.out | tail -1
 
-      - name: Build binary
-        run: go build -o server .
+      - name: Build server binary
+        run: go build -o server ./cmd/server
+
+      - name: Build migrate binary
+        run: go build -o migrate ./cmd/migrate
