@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres123
+          POSTGRES_DB: gocrud2_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Run go vet
+        run: go vet ./...
+
+      - name: Run lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+
+      - name: Run DDL migrations
+        env:
+          APP_ENV: dev
+          GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
+        run: go run cmd/migrate/main.go ddl up
+
+      - name: Run DML migrations
+        env:
+          APP_ENV: dev
+          GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
+        run: go run cmd/migrate/main.go dml up
+
+      - name: Run tests with coverage
+        env:
+          DATABASE_URL: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
+        run: go test ./... -v -coverprofile=coverage.out
+
+      - name: Show coverage summary
+        run: go tool cover -func=coverage.out | tail -1
+
+      - name: Build binary
+        run: go build -o server .

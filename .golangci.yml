@@ -1,0 +1,20 @@
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - errcheck      # errors aren't silently ignored
+    - govet         # suspicious constructs
+    - staticcheck   # bugs, simplifications
+    - unused        # unused vars/imports/funcs
+    - gofmt         # formatting
+    - goimports     # import ordering
+    - revive        # style/naming conventions
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+
+issues:
+  exclude-dirs:
+    - docs
