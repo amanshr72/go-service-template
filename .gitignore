@@ -4,7 +4,6 @@
 
 # Binaries
 *.exe
-server
 go-crud2.exe
 
 # Build artifacts
