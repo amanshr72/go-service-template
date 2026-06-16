@@ -12,9 +12,6 @@ go-crud2.exe
 coverage.out
 coverage.html
 
-# Swagger generated (regenerate via swag init)
-docs/
-
 # IDE
 .vscode/
 .idea/
