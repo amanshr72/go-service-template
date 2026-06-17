@@ -12,33 +12,62 @@ on:
           - prod
 
 jobs:
-  migrate:
+  migrate-dml:
     runs-on: ubuntu-latest
-
-    environment:
-      name: ${{ inputs.environment }}
-
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres123
+          POSTGRES_DB: gocrud2_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
 
-      - name: Run Stage DDL + DML
-        if: inputs.environment == 'stage'
+      - name: Run DML migrations
         env:
+          GOOSE_DRIVER: postgres
           GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
-        run: |
-          go run cmd/migrate/main.go ddl up
-          go run cmd/migrate/main.go dml up
+          APP_ENV: ${{ inputs.environment }}
+        run: go run cmd/migrate/main.go dml up
 
-      - name: Run Prod DML
-        if: inputs.environment == 'prod'
+  migrate-ddl:
+    runs-on: ubuntu-latest
+    needs: migrate-dml
+    environment: ${{ inputs.environment }}-ddl
+    services:
+      postgres:
+        image: postgres:15-alpine
         env:
-          GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
-        run: |
-          go run cmd/migrate/main.go dml up
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres123
+          POSTGRES_DB: gocrud2_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
 
-      - name: Run Prod DDL
-        if: inputs.environment == 'prod'
+      - name: Run DDL migrations
         env:
+          GOOSE_DRIVER: postgres
           GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
-        run: |
-          go run cmd/migrate/main.go ddl up
+          APP_ENV: ${{ inputs.environment }}
+        run: go run cmd/migrate/main.go ddl up
