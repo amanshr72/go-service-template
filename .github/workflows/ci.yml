@@ -45,17 +45,17 @@ jobs:
         with:
           version: latest
 
-      - name: Run DDL migrations
-        env:
-          APP_ENV: dev
-          GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
-        run: go run cmd/migrate/main.go ddl up
+      # - name: Run DDL migrations
+      #   env:
+      #     APP_ENV: dev
+      #     GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
+      #   run: go run cmd/migrate/main.go ddl up
 
-      - name: Run DML migrations
-        env:
-          APP_ENV: dev
-          GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
-        run: go run cmd/migrate/main.go dml up
+      # - name: Run DML migrations
+      #   env:
+      #     APP_ENV: dev
+      #     GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
+      #   run: go run cmd/migrate/main.go dml up
 
       - name: Run tests with coverage
         env:
