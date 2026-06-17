@@ -1,3 +1,4 @@
+# .github/workflows/migration.yml
 name: Database Migration
 
 on:
@@ -10,41 +11,20 @@ on:
         options:
           - stage
           - prod
+      migration_type:
+        description: "What to run (prod DDL needs approval)"
+        required: true
+        type: choice
+        options:
+          - dml-only # prod safe: just seed/data
+          - ddl-then-dml # stage: full setup, or prod DDL + seed when explicitly chosen
 
 jobs:
-  migrate-dml:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres123
-          POSTGRES_DB: gocrud2_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-
-      - name: Run DML migrations
-        env:
-          GOOSE_DRIVER: postgres
-          GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
-          APP_ENV: ${{ inputs.environment }}
-        run: go run cmd/migrate/main.go dml up
-
+  # ── DDL first — only when ddl-then-dml is chosen ─────────────────────────
   migrate-ddl:
+    if: inputs.migration_type == 'ddl-then-dml'
     runs-on: ubuntu-latest
-    needs: migrate-dml
-    environment: ${{ inputs.environment }}-ddl
+    environment: ${{ inputs.environment }}-ddl # prod-ddl has required reviewer in GitHub settings
     services:
       postgres:
         image: postgres:15-alpine
@@ -64,10 +44,40 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-
       - name: Run DDL migrations
         env:
           GOOSE_DRIVER: postgres
           GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
           APP_ENV: ${{ inputs.environment }}
         run: go run cmd/migrate/main.go ddl up
+
+  # ── DML after — runs in both cases, waits for DDL job only when it exists ─
+  migrate-dml:
+    runs-on: ubuntu-latest
+    needs: [migrate-ddl]
+    if: always() && !failure() && !cancelled()
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres123
+          POSTGRES_DB: gocrud2_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Run DML migrations
+        env:
+          GOOSE_DRIVER: postgres
+          GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
+          APP_ENV: ${{ inputs.environment }}
+        run: go run cmd/migrate/main.go dml up
