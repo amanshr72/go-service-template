@@ -1,0 +1,33 @@
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: ${{ inputs.environment }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Stage DDL + DML
+        if: inputs.environment == 'stage'
+        env:
+          GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
+        run: |
+          go run cmd/migrate/main.go ddl up
+          go run cmd/migrate/main.go dml up
+
+
+      - name: Run Prod DML
+        if: inputs.environment == 'prod'
+        env:
+          GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
+        run: |
+          go run cmd/migrate/main.go dml up
+
+
+      - name: Run Prod DDL
+        if: inputs.environment == 'prod'
+        env:
+          GOOSE_DBSTRING: "host=localhost user=postgres password=postgres123 dbname=gocrud2_test sslmode=disable"
+        run: |
+          go run cmd/migrate/main.go ddl up

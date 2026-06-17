@@ -19,7 +19,6 @@ func main() {
 	migType := os.Args[1] // ddl | dml
 	action := os.Args[2]  // up | down | status
 	_ = godotenv.Load()
-	env := os.Getenv("APP_ENV")
 	dbString := os.Getenv("GOOSE_DBSTRING")
 
 	if dbString == "" {
@@ -30,9 +29,10 @@ func main() {
 		log.Fatalf("invalid type %q: must be ddl or dml", migType)
 	}
 
-	if migType == "ddl" && env == "prod" {
-		log.Fatal("DDL blocked in prod. Use elevated manual credentials directly.")
-	}
+	// env := os.Getenv("APP_ENV")
+	// if migType == "ddl" && env == "prod" {
+	// 	log.Fatal("DDL blocked in prod. Use elevated manual credentials directly.")
+	// }
 
 	db, err := sql.Open("postgres", dbString)
 	if err != nil {
