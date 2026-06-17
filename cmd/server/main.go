@@ -9,16 +9,21 @@ import (
 	"go-crud2/internal/profiling"
 	"go-crud2/internal/user"
 	"log"
+	"net"
 	"net/http"
 	"os"
+
+	_ "go-crud2/docs"
+	"go-crud2/internal/user/pb"
+
+	"google.golang.org/grpc/reflection"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	httpSwagger "github.com/swaggo/http-swagger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	_ "go-crud2/docs"
+	"google.golang.org/grpc"
 )
 
 // @title Go CRUD2 API
@@ -77,6 +82,7 @@ func main() {
 
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 
+	go startGRPCServer(svc)
 	apiMux := http.NewServeMux()
 	if err := user.RegisterRoutes(apiMux, svc); err != nil {
 		log.Fatalf("routes: %v", err)
@@ -107,4 +113,19 @@ func connectMongo() *mongo.Collection {
 		log.Fatalf("mongo ping failed: %v", err)
 	}
 	return client.Database("gocrud2").Collection("users")
+}
+func startGRPCServer(svc user.Service) {
+	lis, err := net.Listen("tcp", ":9090")
+	if err != nil {
+		log.Fatalf("grpc listen failed: %v", err)
+	}
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterUserServiceServer(grpcServer, user.NewGRPCServer(svc))
+	reflection.Register(grpcServer)
+
+	log.Println("gRPC server on :9090")
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("grpc serve failed: %v", err)
+	}
 }
