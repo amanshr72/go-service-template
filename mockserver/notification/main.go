@@ -55,9 +55,9 @@ func handleSend(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// handleFlakySend randomly fails ~30% of the time — simulates real-world vendor instability
+// handleFlakySend randomly fails ~50% of the time — simulates real-world vendor instability
 func handleFlakySend(w http.ResponseWriter, r *http.Request) {
-	if rand.Float64() < 0.3 {
+	if rand.Float64() < 0.5 {
 		w.WriteHeader(http.StatusServiceUnavailable)
 		_ = json.NewEncoder(w).Encode(map[string]string{"error": "vendor temporarily unavailable"})
 		return

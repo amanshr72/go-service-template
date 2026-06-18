@@ -1,5 +1,3 @@
-// client_test.go — tests our HTTP client logic against an in-process mock server.
-// httptest.Server is a real listening server, but managed entirely inside the test.
 package notification
 
 import (
@@ -53,7 +51,7 @@ func TestClient_SendEmail_VendorError(t *testing.T) {
 func TestClient_SendEmail_MalformedResponse(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte("not json")) // simulate vendor returning garbage
+		_, _ = w.Write([]byte("not json")) // simulate vendor returning garbage
 	}))
 	defer server.Close()
 

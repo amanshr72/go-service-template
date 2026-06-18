@@ -1,5 +1,3 @@
-// client.go — port + real adapter for an external notification vendor.
-// The vendor sends emails; we call POST {BaseURL}/v1/send with a JSON payload.
 package notification
 
 import (
@@ -65,7 +63,7 @@ func (c *httpClient) SendEmail(req SendEmailRequest) (*SendEmailResponse, error)
 	if err != nil {
 		return nil, fmt.Errorf("call vendor: %w", err) // network error, timeout etc.
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New("vendor returned non-200 status")
