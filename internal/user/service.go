@@ -2,15 +2,18 @@ package user
 
 import (
 	"errors"
+	"go-crud2/internal/notification"
+	"log"
 	"strings"
 )
 
 type service struct {
-	repo Repository
+	repo     Repository
+	notifier notification.Client
 }
 
-func NewService(repo Repository) Service {
-	return &service{repo: repo}
+func NewService(repo Repository, notifier notification.Client) Service {
+	return &service{repo: repo, notifier: notifier}
 }
 
 func (s *service) Create(input CreateUserInput) (*User, error) {
@@ -27,6 +30,14 @@ func (s *service) Create(input CreateUserInput) (*User, error) {
 	}
 	if err := s.repo.Create(u); err != nil {
 		return nil, err
+	}
+	_, err := s.notifier.SendEmail(notification.SendEmailRequest{
+		To:      u.Email,
+		Subject: "Welcome!",
+		Body:    "Your account has been created, " + u.Name,
+	})
+	if err != nil {
+		log.Printf("warning: welcome email failed for user %d: %v", u.ID, err)
 	}
 	return u, nil
 }

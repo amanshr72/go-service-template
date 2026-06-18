@@ -11,7 +11,7 @@ import (
 )
 
 func TestGRPC_CreateUser(t *testing.T) {
-	svc := NewService(NewMockRepository())
+	svc := NewService(NewMockRepository(), &MockNotifier{})
 	s := NewGRPCServer(svc)
 
 	resp, err := s.CreateUser(context.Background(), &pb.CreateUserRequest{Name: "Aman", Email: "a@t.com"})
@@ -20,7 +20,7 @@ func TestGRPC_CreateUser(t *testing.T) {
 }
 
 func TestGRPC_GetUser_NotFound(t *testing.T) {
-	svc := NewService(NewMockRepository())
+	svc := NewService(NewMockRepository(), &MockNotifier{})
 	s := NewGRPCServer(svc)
 
 	_, err := s.GetUser(context.Background(), &pb.GetUserRequest{Id: 999})
@@ -33,7 +33,7 @@ func TestGRPC_GetUser_NotFound(t *testing.T) {
 }
 
 func TestGRPC_ListUsers(t *testing.T) {
-	svc := NewService(NewMockRepository())
+	svc := NewService(NewMockRepository(), &MockNotifier{})
 	_, _ = svc.Create(CreateUserInput{Name: "A", Email: "a@t.com"})
 	s := NewGRPCServer(svc)
 
@@ -43,7 +43,7 @@ func TestGRPC_ListUsers(t *testing.T) {
 }
 
 func TestGRPC_DeleteUser(t *testing.T) {
-	svc := NewService(NewMockRepository())
+	svc := NewService(NewMockRepository(), &MockNotifier{})
 	u, _ := svc.Create(CreateUserInput{Name: "Del", Email: "d@t.com"})
 	s := NewGRPCServer(svc)
 

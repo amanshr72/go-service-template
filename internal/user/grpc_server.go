@@ -1,4 +1,3 @@
-// grpc_server.go — gRPC adapter. Same Service port as REST/GraphQL, different transport.
 package user
 
 import (

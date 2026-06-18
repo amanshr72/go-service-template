@@ -6,6 +6,7 @@ import (
 	"go-crud2/internal/auth"
 	"go-crud2/internal/health"
 	"go-crud2/internal/middleware"
+	"go-crud2/internal/notification"
 	"go-crud2/internal/profiling"
 	"go-crud2/internal/user"
 	"log"
@@ -74,7 +75,8 @@ func main() {
 		log.Println("Using Postgres adapter")
 	}
 
-	svc := user.NewService(repo)
+	notifier := notification.NewClient(os.Getenv("NOTIFICATION_API_URL"))
+	svc := user.NewService(repo, notifier)
 	mux := http.NewServeMux()
 
 	auth.RegisterRoutes(mux)

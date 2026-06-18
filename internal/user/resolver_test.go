@@ -10,7 +10,7 @@ import (
 // helper: builds schema with mock service, executes a query string
 func runQuery(t *testing.T, query string) *graphql.Result {
 	t.Helper()
-	svc := NewService(NewMockRepository())
+	svc := NewService(NewMockRepository(), &MockNotifier{})
 	// pre-seed one user so queries have data
 	_, _ = svc.Create(CreateUserInput{Name: "Aman", Email: "aman@t.com"})
 
@@ -55,7 +55,7 @@ func TestResolver_QueryCount(t *testing.T) {
 }
 
 func TestResolver_MutationCreate(t *testing.T) {
-	svc := NewService(NewMockRepository())
+	svc := NewService(NewMockRepository(), &MockNotifier{})
 	schema, _ := NewSchema(svc)
 
 	result := graphql.Do(graphql.Params{
@@ -69,7 +69,7 @@ func TestResolver_MutationCreate(t *testing.T) {
 }
 
 func TestResolver_MutationDelete(t *testing.T) {
-	svc := NewService(NewMockRepository())
+	svc := NewService(NewMockRepository(), &MockNotifier{})
 	created, _ := svc.Create(CreateUserInput{Name: "Del", Email: "del@t.com"})
 	schema, _ := NewSchema(svc)
 
