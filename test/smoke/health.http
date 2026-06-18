@@ -1,0 +1,14 @@
+### Liveness
+GET http://localhost:8080/health
+
+###
+
+### Readiness
+GET http://localhost:8080/health/ready
+
+###
+
+### Metrics
+GET http://localhost:8080/health/metrics
+
+###

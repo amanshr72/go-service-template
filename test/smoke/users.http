@@ -1,0 +1,60 @@
+### Create User
+POST http://localhost:8080/api/v1/users
+Content-Type: application/json
+
+{
+  "name": "Aman Sharma",
+  "email": "aman@test.com"
+}
+
+###
+
+### Create User 2
+POST http://localhost:8080/api/v1/users
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john@test.com"
+}
+
+###
+
+### Get All Users
+GET http://localhost:8080/api/v1/users
+
+###
+
+### Get User By ID
+GET http://localhost:8080/api/v1/users/1
+
+###
+
+### Update User
+PUT http://localhost:8080/api/v1/users/1
+Content-Type: application/json
+
+{
+  "name": "Aman Updated",
+  "email": "aman.updated@test.com"
+}
+
+###
+
+### Get Active Users
+GET http://localhost:8080/api/v1/users/active/true
+
+###
+
+### Get Inactive Users
+GET http://localhost:8080/api/v1/users/active/false
+
+###
+
+### User Count
+GET http://localhost:8080/api/v1/users/count
+
+###
+
+### Delete User
+DELETE http://localhost:8080/api/v1/users/1

@@ -1,0 +1,55 @@
+### GraphQL Health Check Query
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "{ users { id name email is_active } }"
+}
+
+###
+
+### Get Users
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "query { users { id name email is_active created_at updated_at } }"
+}
+
+###
+
+### Get User By ID
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "query { user(id: 1) { id name email is_active } }"
+}
+
+###
+
+### Create User
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation { createUser(name:\"GraphQL User\", email:\"graphql@test.com\") { id name email } }"
+}
+###
+
+### Update User
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query":"mutation{updateUser(id:1,name:\"Updated User\",email:\"updated@test.com\"){id name email}}"
+}
+###
+
+### Delete User
+POST http://localhost:8080/graphql
+Content-Type: application/json
+
+{
+  "query": "mutation { deleteUser(id:1) }"
+}

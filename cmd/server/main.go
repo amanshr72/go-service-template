@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"go-crud2/internal/auth"
 	"go-crud2/internal/health"
+	"go-crud2/internal/metrics"
 	"go-crud2/internal/middleware"
 	"go-crud2/internal/notification"
 	"go-crud2/internal/profiling"
@@ -18,6 +19,8 @@ import (
 	"go-crud2/internal/user/pb"
 
 	"google.golang.org/grpc/reflection"
+
+	"go-crud2/internal/product"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -36,69 +39,83 @@ import (
 // @name Authorization
 func main() {
 	_ = godotenv.Load()
-	adapter := os.Getenv("DB_ADAPTER")
-
-	var (
-		repo user.Repository
-		db   *sql.DB
-	)
 
 	if os.Getenv("APP_ENV") != "prod" {
 		profiling.Start()
 	}
 
-	switch adapter {
-	case "inmemory":
-		repo = user.NewInMemoryRepository()
-		log.Println("Using in-memory adapter")
-
-	case "mongodb":
-		repo = user.NewMongoRepository(connectMongo())
-		log.Println("Using MongoDB adapter")
-
-	default:
-		var err error
-		db, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
-		if err != nil {
-			log.Fatalf("db open failed: %v", err)
-		}
+	repo, db := setupUserRepository()
+	if db != nil {
 		defer func() {
 			if err := db.Close(); err != nil {
 				log.Printf("close db: %v", err)
 			}
 		}()
-		if err := db.Ping(); err != nil {
-			log.Fatalf("db ping failed: %v", err)
-		}
-		// if err := user.Migrate(db); err != nil {log.Fatalf("migration failed: %v", err)}
-		repo = user.NewRepository(db)
-		log.Println("Using Postgres adapter")
 	}
 
 	notifier := notification.NewClient(os.Getenv("NOTIFICATION_API_URL"))
-	svc := user.NewService(repo, notifier)
+	userSvc := user.NewService(repo, notifier)
 	mux := http.NewServeMux()
 
+	// Public routes — no auth
 	auth.RegisterRoutes(mux)
 	health.RegisterRoutes(mux, db)
 
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
+	mux.Handle("/metrics", metrics.Handler())
 
-	go startGRPCServer(svc)
+	go startGRPCServer(userSvc)
+
+	// User routes (REST + GraphQL) — stdlib mux
 	apiMux := http.NewServeMux()
-	if err := user.RegisterRoutes(apiMux, svc); err != nil {
+	if err := user.RegisterRoutes(apiMux, userSvc); err != nil {
 		log.Fatalf("routes: %v", err)
 	}
-
 	// mux.Handle("/api/", middleware.Authenticate(apiMux))
 	// mux.Handle("/graphql", middleware.Authenticate(apiMux))
 	mux.Handle("/api/", apiMux)
 	mux.Handle("/graphql", apiMux)
 
-	server := middleware.Chain(mux, middleware.RequestID, middleware.Logger, middleware.Recovery)
+	// Product routes — chi, mounted under stdlib mux
+	mountProductRoutes(mux)
+
+	server := middleware.Chain(mux, middleware.RequestID, middleware.Logger, middleware.Metrics, middleware.Recovery)
 
 	log.Println("Server on :8080")
 	log.Fatal(http.ListenAndServe(":8080", server))
+}
+
+// setupUserRepository picks the Repository adapter based on DB_ADAPTER env var.
+// Returns db as nil for inmemory/mongodb — only postgres needs a *sql.DB handle
+func setupUserRepository() (user.Repository, *sql.DB) {
+	switch os.Getenv("DB_ADAPTER") {
+	case "inmemory":
+		log.Println("Using in-memory adapter")
+		return user.NewInMemoryRepository(), nil
+
+	case "mongodb":
+		log.Println("Using MongoDB adapter")
+		return user.NewMongoRepository(connectMongo()), nil
+
+	default:
+		db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+		if err != nil {
+			log.Fatalf("db open failed: %v", err)
+		}
+		if err := db.Ping(); err != nil {
+			log.Fatalf("db ping failed: %v", err)
+		}
+		log.Println("Using Postgres adapter")
+		return user.NewRepository(db), db
+	}
+}
+
+func mountProductRoutes(mux *http.ServeMux) {
+	productRepo := product.NewInMemoryRepository()
+	productSvc := product.NewService(productRepo)
+	productRouter := product.NewRouter(productSvc)
+
+	mux.Handle("/api/v1/products/", http.StripPrefix("/api/v1/products", productRouter))
 }
 
 // connectMongo returns *mongo.Collection directly — no interface{}
