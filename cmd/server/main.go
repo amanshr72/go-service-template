@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"go-crud2/internal/auth"
 	"go-crud2/internal/health"
 	"go-crud2/internal/metrics"
@@ -66,6 +67,20 @@ func main() {
 
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 	mux.Handle("/metrics", metrics.Handler())
+	mux.HandleFunc("/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./tsp/tsp-output/schema/openapi.yaml")
+	})
+	mux.HandleFunc("/swagger-ts", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html")
+		fmt.Fprint(w, `<!DOCTYPE html><html><head>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist/swagger-ui.css">
+		</head><body>
+		<div id="swagger-ui"></div>
+		<script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist/swagger-ui-bundle.js"></script>
+		<script>
+		SwaggerUIBundle({ url: "/openapi.yaml", dom_id: '#swagger-ui' })
+		</script></body></html>`)
+	})
 
 	go startGRPCServer(userSvc)
 

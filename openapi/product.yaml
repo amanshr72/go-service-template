@@ -1,0 +1,7 @@
+openapi: 3.1.0
+info:
+  title: Go CRUD2 Product API
+  version: 0.0.0
+tags: []
+paths: {}
+components: {}
