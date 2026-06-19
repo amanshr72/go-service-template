@@ -46,64 +46,33 @@ func setupServer() http.Handler {
 
 func TestSmoke_Health(t *testing.T) {
 	server := setupServer()
-
-	req := httptest.NewRequest(
-		http.MethodGet,
-		"/health",
-		nil,
-	)
-
+	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	rec := httptest.NewRecorder()
-
 	server.ServeHTTP(rec, req)
-
 	assert.NotEqual(t, http.StatusInternalServerError, rec.Code)
 }
 
 func TestSmoke_Users(t *testing.T) {
 	server := setupServer()
 
-	req := httptest.NewRequest(
-		http.MethodGet,
-		"/api/v1/users",
-		nil,
-	)
-
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/users", nil)
 	rec := httptest.NewRecorder()
-
 	server.ServeHTTP(rec, req)
-
 	assert.NotEqual(t, http.StatusInternalServerError, rec.Code)
 }
 
 func TestSmoke_Login(t *testing.T) {
 	server := setupServer()
-
-	req := httptest.NewRequest(
-		http.MethodPost,
-		"/auth/login",
-		nil,
-	)
-
+	req := httptest.NewRequest(http.MethodPost, "/auth/login", nil)
 	rec := httptest.NewRecorder()
-
 	server.ServeHTTP(rec, req)
-
 	assert.NotEqual(t, http.StatusInternalServerError, rec.Code)
 }
 
 func TestSmoke_GraphQL(t *testing.T) {
 	server := setupServer()
-
-	req := httptest.NewRequest(
-		http.MethodPost,
-		"/graphql",
-		nil,
-	)
-
+	req := httptest.NewRequest(http.MethodPost, "/graphql", nil)
 	rec := httptest.NewRecorder()
-
 	server.ServeHTTP(rec, req)
-
 	assert.NotEqual(t, http.StatusInternalServerError, rec.Code)
 }

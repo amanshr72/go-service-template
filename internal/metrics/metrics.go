@@ -1,6 +1,3 @@
-// metrics.go defines Prometheus metrics and exposes them at /metrics.
-// This is SEPARATE from your existing health.metrics() JSON endpoint —
-// Prometheus needs its own text format, can't reuse the JSON one.
 package metrics
 
 import (
@@ -40,11 +37,9 @@ var (
 )
 
 func init() {
-	// Register metrics so Prometheus client library knows to expose them
 	prometheus.MustRegister(RequestsTotal, RequestDuration, ActiveRequests)
 }
 
-// Handler — mount this at /metrics, separate path from your existing health metrics
 func Handler() http.Handler {
 	return promhttp.Handler()
 }

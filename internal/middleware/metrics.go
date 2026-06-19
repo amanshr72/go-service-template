@@ -1,5 +1,3 @@
-// metrics.go (middleware) — wraps every request, records counts + duration.
-// Sits in the same Chain() as Logger/Recovery/RequestID.
 package middleware
 
 import (
@@ -15,7 +13,7 @@ func Metrics(next http.Handler) http.Handler {
 		defer metrics.ActiveRequests.Dec()
 
 		start := time.Now()
-		wrapped := &responseWriter{ResponseWriter: w, status: http.StatusOK} // reused from logger.go
+		wrapped := &responseWriter{ResponseWriter: w, status: http.StatusOK}
 
 		next.ServeHTTP(wrapped, r)
 

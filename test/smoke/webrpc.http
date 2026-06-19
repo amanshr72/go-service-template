@@ -1,0 +1,64 @@
+### WebRPC Create User
+POST http://localhost:8080/rpc/UserService/CreateUser
+Content-Type: application/json
+
+{
+  "input": {
+    "name": "Aman",
+    "email": "aman@test.com"
+  }
+}
+
+
+### WebRPC Get User
+POST http://localhost:8080/rpc/UserService/GetUser
+Content-Type: application/json
+
+{
+  "id": 1
+}
+
+
+### WebRPC List Users
+POST http://localhost:8080/rpc/UserService/ListUsers
+Content-Type: application/json
+
+{}
+
+
+### WebRPC Update User
+POST http://localhost:8080/rpc/UserService/UpdateUser
+Content-Type: application/json
+
+{
+  "id": 1,
+  "input": {
+    "name": "Aman Updated",
+    "email": "aman.updated@test.com"
+  }
+}
+
+
+### WebRPC Delete User
+POST http://localhost:8080/rpc/UserService/DeleteUser
+Content-Type: application/json
+
+{
+  "id": 1
+}
+
+
+### WebRPC Get Count
+POST http://localhost:8080/rpc/UserService/GetCount
+Content-Type: application/json
+
+{}
+
+
+### WebRPC Get Active Users
+POST http://localhost:8080/rpc/UserService/GetActiveUsers
+Content-Type: application/json
+
+{
+  "active": true
+}

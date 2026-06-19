@@ -2,6 +2,7 @@ package user
 
 import (
 	"encoding/json"
+	webrpcuser "go-crud2/internal/user/webrpc"
 	"net/http"
 
 	"github.com/graphql-go/graphql"
@@ -47,4 +48,8 @@ func graphqlHandler(schema graphql.Schema) http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(result)
 	}
+}
+func RegisterWebRPCRoutes(mux *http.ServeMux, svc Service) {
+	webrpcHandler := webrpcuser.NewUserServiceServer(NewWebRPCServer(svc))
+	mux.Handle("/rpc/UserService/", webrpcHandler)
 }

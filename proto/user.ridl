@@ -1,0 +1,28 @@
+webrpc = v1
+name = UserService
+version = v0.1.0
+basepath = /rpc 
+
+struct User
+  - id: uint32
+  - name: string
+  - email: string
+  - isActive: bool
+
+struct CreateUserInput
+  - name: string
+  - email: string
+
+struct UpdateUserInput
+  - name: string
+  - email: string
+
+# Service definition — maps directly to your Service interface methods
+service UserService
+  - CreateUser(input: CreateUserInput) => (user: User)
+  - GetUser(id: uint32) => (user: User)
+  - ListUsers() => (users: []User)
+  - UpdateUser(id: uint32, input: UpdateUserInput) => (user: User)
+  - DeleteUser(id: uint32) => (success: bool)
+  - GetCount() => (count: int32)
+  - GetActiveUsers(active: bool) => (users: []User)

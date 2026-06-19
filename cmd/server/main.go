@@ -61,6 +61,9 @@ func main() {
 	auth.RegisterRoutes(mux)
 	health.RegisterRoutes(mux, db)
 
+	// webrpc
+	user.RegisterWebRPCRoutes(mux, userSvc)
+
 	mux.Handle("/swagger/", httpSwagger.WrapHandler)
 	mux.Handle("/metrics", metrics.Handler())
 
