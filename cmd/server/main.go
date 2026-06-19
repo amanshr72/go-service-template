@@ -72,14 +72,18 @@ func main() {
 	})
 	mux.HandleFunc("/swagger-ts", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprint(w, `<!DOCTYPE html><html><head>
+
+		if _, err := fmt.Fprint(w, `<!DOCTYPE html><html><head>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist/swagger-ui.css">
 		</head><body>
 		<div id="swagger-ui"></div>
 		<script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist/swagger-ui-bundle.js"></script>
 		<script>
 		SwaggerUIBundle({ url: "/openapi.yaml", dom_id: '#swagger-ui' })
-		</script></body></html>`)
+		</script></body></html>`); err != nil {
+			http.Error(w, "failed to render swagger ui", http.StatusInternalServerError)
+			return
+		}
 	})
 
 	go startGRPCServer(userSvc)
