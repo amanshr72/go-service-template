@@ -9,13 +9,6 @@ func RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /auth/login", loginHandler())
 }
 
-// @Summary Login
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param input body LoginInput true "Credentials"
-// @Success 200 {object} TokenResponse
-// @Router /auth/login [post]
 func loginHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var input LoginInput

@@ -31,13 +31,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-// @title Go CRUD2 API
-// @version 1.0
-// @description REST + GraphQL User Service
-// @BasePath /
-// @securityDefinitions.apikey BearerAuth
-// @in header
-// @name Authorization
 func main() {
 	_ = godotenv.Load()
 

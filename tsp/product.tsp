@@ -2,7 +2,7 @@ import "./main.tsp";
 
 using Http;
 
-namespace ProductAPI;
+namespace AppAPI;
 
 model Product {
   id: int64;
@@ -19,6 +19,7 @@ model ErrorResponse {
   error: string;
 }
 
+@tag("Products")
 @route("/api/v1/products")
 interface Products {
   @post
