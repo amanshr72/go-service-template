@@ -17,7 +17,7 @@ func TestRepository_Create(t *testing.T) {
 	err := repo.Create(p)
 
 	assert.NoError(t, err)
-	assert.Equal(t, 1, p.ID)
+	assert.Equal(t, 1, p.Id)
 }
 
 func TestRepository_GetByID(t *testing.T) {
@@ -30,7 +30,7 @@ func TestRepository_GetByID(t *testing.T) {
 
 	_ = repo.Create(p)
 
-	found, err := repo.GetByID(p.ID)
+	found, err := repo.GetByID(p.Id)
 
 	assert.NoError(t, err)
 	assert.Equal(t, p.Name, found.Name)

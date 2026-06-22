@@ -2,6 +2,7 @@ package product
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -16,24 +17,20 @@ func NewHandler(svc Service) *Handler {
 	return &Handler{svc: svc}
 }
 
-func writeJSON(w http.ResponseWriter, status int, v any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(v)
-}
-
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		Name  string  `json:"name"`
-		Price float64 `json:"price"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid json"})
+	var req CreateProductRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "invalid JSON"})
 		return
 	}
-	p, err := h.svc.Create(input.Name, input.Price)
+	p, err := h.svc.Create(req)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": err.Error()})
+		var ve *ValidationError
+		if errors.As(err, &ve) {
+			writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "validation failed", Fields: &ve.Fields})
+			return
+		}
+		writeJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "internal error"})
 		return
 	}
 	writeJSON(w, http.StatusCreated, p)
@@ -42,26 +39,29 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) GetAll(w http.ResponseWriter, r *http.Request) {
 	products, err := h.svc.GetAll()
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusInternalServerError, ErrorResponse{Error: "internal error"})
 		return
-	}
-	if products == nil {
-		products = []Product{}
 	}
 	writeJSON(w, http.StatusOK, products)
 }
 
 func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
-	// chi.URLParam — chi's equivalent of stdlib's r.PathValue("id")
-	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid id"})
+		writeJSON(w, http.StatusBadRequest, ErrorResponse{Error: "invalid id"})
 		return
 	}
 	p, err := h.svc.GetByID(id)
 	if err != nil {
-		writeJSON(w, http.StatusNotFound, map[string]string{"error": err.Error()})
+		writeJSON(w, http.StatusNotFound, ErrorResponse{Error: "product not found"})
 		return
 	}
 	writeJSON(w, http.StatusOK, p)
+}
+
+func writeJSON(w http.ResponseWriter, status int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	_ = json.NewEncoder(w).Encode(v)
 }

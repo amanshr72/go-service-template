@@ -7,21 +7,21 @@ import (
 
 type InMemoryRepository struct {
 	mu     sync.RWMutex
-	items  map[int]*Product
-	nextID int
+	items  map[int64]*Product
+	nextID int64
 }
 
 func NewInMemoryRepository() Repository {
-	return &InMemoryRepository{items: make(map[int]*Product), nextID: 1}
+	return &InMemoryRepository{items: make(map[int64]*Product), nextID: 1}
 }
 
 func (r *InMemoryRepository) Create(p *Product) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	p.ID = r.nextID
+	p.Id = r.nextID
 	r.nextID++
 	copy := *p
-	r.items[copy.ID] = &copy
+	r.items[copy.Id] = &copy
 	return nil
 }
 
@@ -35,7 +35,7 @@ func (r *InMemoryRepository) GetAll() ([]Product, error) {
 	return result, nil
 }
 
-func (r *InMemoryRepository) GetByID(id int) (*Product, error) {
+func (r *InMemoryRepository) GetByID(id int64) (*Product, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	p, ok := r.items[id]

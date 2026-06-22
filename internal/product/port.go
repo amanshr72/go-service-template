@@ -3,11 +3,11 @@ package product
 type Repository interface {
 	Create(*Product) error
 	GetAll() ([]Product, error)
-	GetByID(int) (*Product, error)
+	GetByID(int64) (*Product, error)
 }
 
 type Service interface {
-	Create(name string, price float64) (*Product, error)
+	Create(req CreateProductRequest) (*Product, error)
 	GetAll() ([]Product, error)
-	GetByID(int) (*Product, error)
+	GetByID(int64) (*Product, error)
 }
