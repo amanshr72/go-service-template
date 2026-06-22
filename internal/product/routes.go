@@ -12,5 +12,7 @@ func NewRouter(svc Service) chi.Router {
 	r.Get("/", h.GetAll)
 	r.Get("/{id}", h.GetByID)
 
+	r.Get("/slow", h.SlowGetAll)
+
 	return r
 }

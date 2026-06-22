@@ -3,8 +3,10 @@ package product
 import (
 	"encoding/json"
 	"errors"
+	"math/rand"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 )
@@ -64,4 +66,15 @@ func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(v)
+}
+
+// Simulates a slow DB query for Grafana incident practice.
+func (h *Handler) SlowGetAll(w http.ResponseWriter, r *http.Request) {
+	time.Sleep(time.Duration(500+rand.Intn(1500)) * time.Millisecond)
+	products, err := h.svc.GetAll()
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
+	writeJSON(w, http.StatusOK, products)
 }
