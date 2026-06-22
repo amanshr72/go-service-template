@@ -27,7 +27,9 @@ func main() {
 		req, _ := http.NewRequest(e.method, e.url, bytes.NewBuffer(nil))
 		resp, err := client.Do(req)
 		if err == nil {
-			resp.Body.Close()
+			if closeErr := resp.Body.Close(); closeErr != nil {
+				fmt.Printf("body close error: %v\n", closeErr)
+			}
 		}
 		time.Sleep(time.Duration(50+rand.Intn(150)) * time.Millisecond)
 	}
