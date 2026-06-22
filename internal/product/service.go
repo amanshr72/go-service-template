@@ -1,7 +1,6 @@
 package product
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -13,25 +12,14 @@ func NewService(repo Repository) Service {
 	return &service{repo: repo}
 }
 
-func validate(req CreateProductRequest) error {
-	if req.Name == "" {
-		return errors.New("name is required")
-	}
-	if req.Price <= 0 {
-		return errors.New("price must be positive")
-	}
-	if req.Description == "" {
-		return errors.New("description is required")
-	}
-	if req.Category == "" {
-		return errors.New("category is required")
-	}
-	if req.Stock < 0 {
-		return errors.New("stock must be >= 0")
-	}
-	return nil
-}
-
+//	func validate(req CreateProductRequest) error {
+//		if req.Name == "" {	return errors.New("name is required")}
+//		if req.Price <= 0 {	return errors.New("price must be positive")}
+//		if req.Description == "" {	return errors.New("description is required")}
+//		if req.Category == "" {	return errors.New("category is required")}
+//		if req.Stock < 0 {	return errors.New("stock must be >= 0")}
+//		return nil
+//	}
 func validateFields(req CreateProductRequest) map[string]interface{} {
 	errs := map[string]interface{}{}
 	if req.Name == "" {
